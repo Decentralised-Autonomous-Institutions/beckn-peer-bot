@@ -20,7 +20,14 @@
         "docker:lint": "docker-compose down && docker-compose run --rm beckn-action-bot sh -c 'npm run lint'",
         "docker:test": "docker-compose down && docker-compose run --rm beckn-action-bot sh -c 'npm run test'",
         "docker:test:unit": "docker-compose down && docker-compose run --rm beckn-action-bot sh -c 'npm run test:unit'",
-        "docker:test:apis": "docker-compose down && docker-compose run --rm beckn-action-bot sh -c 'npm run test:apis'"
+        "docker:test:apis": "docker-compose down && docker-compose run --rm beckn-action-bot sh -c 'npm run test:apis'",
+        "llamaedge:install": "bash scripts/install-llamaedge.sh",
+        "llamaedge:start": "bash scripts/start-llamaedge-server.sh --daemon",
+        "llamaedge:stop": "bash scripts/start-llamaedge-server.sh --kill",
+        "llamaedge:restart": "bash scripts/start-llamaedge-server.sh --restart",
+        "llamaedge:status": "bash scripts/start-llamaedge-server.sh --status",
+        "llamaedge:logs": "bash scripts/start-llamaedge-server.sh --logs",
+        "dev:llamaedge": "npm run llamaedge:start && npm run dev"
     },
     "keywords": [],
     "author": "",
