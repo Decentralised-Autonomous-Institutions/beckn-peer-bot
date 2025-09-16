@@ -1,8 +1,8 @@
 import { readFileSync } from 'fs';
-import OpenAI from 'openai'
 import logger from '../utils/logger.js'
 import { v4 as uuidv4 } from 'uuid'
 import Actions from './Actions.js';
+import ModelController from '../controllers/ModelController.js';
 import { TOOLS } from '../config/GPT/tools.js';
 
 // TODO: Load schemas. This needs to be improved so that any new schema is automatically loaded
@@ -28,9 +28,8 @@ const BECKN_ACTIONS = {
 }
 const NUMBER_OF_RETRIES=3;
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_AI_KEY,
-})
+// Initialize model controller for AI providers
+const modelController = new ModelController();
 const registry_config = JSON.parse(readFileSync('./config/registry.json'))
 
 class AI {
@@ -64,11 +63,13 @@ class AI {
     
         ]
         try{
-            const gpt_response = await openai.chat.completions.create({
-                model: process.env.OPENAI_MODEL_ID,
+            // Use ModelController for unified AI provider access
+            const gpt_response = await modelController.createChatCompletion({
+                model: process.env.OPENAI_MODEL_ID || process.env.LLAMAEDGE_MODEL_NAME,
                 messages: [...context, ...messages],
                 tools: TOOLS,
-                tool_choice: "auto", 
+                tool_choice: "auto",
+                temperature: 0.7
             });
             let responseMessage = gpt_response.choices[0].message;
     
@@ -228,9 +229,9 @@ class AI {
         ]
 
         try {
-            const completion = await openai.chat.completions.create({
+            const completion = await modelController.createChatCompletion({
                 messages: openai_messages,
-                model: process.env.OPENAI_MODEL_ID, 
+                model: process.env.OPENAI_MODEL_ID || process.env.LLAMAEDGE_MODEL_NAME,
                 temperature: 0,
                 response_format: { type: 'json_object' },
             })
@@ -295,16 +296,17 @@ class AI {
         ];
     
         try{
-            // Assuming you have a function to abstract the API call
-            const response = await openai.chat.completions.create({
-                model: 'gpt-4-0125-preview', //process.env.OPENAI_MODEL_ID,
+            // Use ModelController for unified AI provider access
+            const response = await modelController.createChatCompletion({
+                model: process.env.OPENAI_MODEL_ID || process.env.LLAMAEDGE_MODEL_NAME,
                 messages: [
                     ...domain_context,
                     ...last_action_context,
                     ...profile_context,
                     ...messages],
                 tools: tools,
-                tool_choice: "auto", // auto is default, but we'll be explicit
+                tool_choice: "auto",
+                temperature: 0.1
             });
             let responseMessage = JSON.parse(response.choices[0].message?.tool_calls[0]?.function?.arguments) || null;
 
